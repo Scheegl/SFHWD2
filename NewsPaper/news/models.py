@@ -23,6 +23,9 @@ class Author(models.Model):
 class Category(models.Model):
     category_name = models.CharField(max_length=32, unique=True)
 
+    def __str__(self):
+        return self.category_name()
+
 
 class Post(models.Model):
     author = models.ForeignKey("Author", on_delete=models.CASCADE)
@@ -36,9 +39,10 @@ class Post(models.Model):
     category_choice = models.CharField(max_length=2, choices=CATEGORY_CHOICES, default=ARTICLE)
     time_creation = models.DateTimeField(auto_now_add=True)
     post_category = models.ManyToManyField(Category, through="PostCategory")
-    title = models.CharField(max_length=64)
+    title = models.CharField(max_length=64, unique=True)
     text = models.TextField()
     rating_post = models.IntegerField(default=0)
+
 
     def like(self):
         self.rating_post +=1
@@ -50,6 +54,9 @@ class Post(models.Model):
 
     def preview(self):
         return self.text[0:123] + '...'
+
+    def __str__(self):
+        return f'{self.title()}: {self.text[:20]}'
 
 
 class PostCategory(models.Model):
