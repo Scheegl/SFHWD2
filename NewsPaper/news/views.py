@@ -1,3 +1,4 @@
+from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse_lazy
@@ -41,17 +42,20 @@ def create_post(request):
 
     return render(request, 'news_edit.html', {'form': form})
 
-class PostCreate(CreateView):
+class PostCreate(PermissionRequiredMixin, CreateView):
+    permission_required = ('news.add_post')
     from_class = PostForm
     model = Post
     template_name = 'news_edit.html'
 
-class PostUpdate(UpdateView):
+class PostUpdate(PermissionRequiredMixin,UpdateView):
+    permission_required = ('news.change_post')
     form_class = PostForm
     model = Post
     template_name = 'news_edit.html'
 
-class PostDelete(DetailView):
+class PostDelete(PermissionRequiredMixin,DetailView):
+    permission_required = ('news.delete_post')
     model = Post
     template_name = 'news_delete.html'
     success_url = reverse_lazy('post_list')
