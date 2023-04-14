@@ -1,5 +1,7 @@
 from audioop import reverse
 
+from django.core.validators import MinValueValidator
+from django.urls import reverse
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Sum
@@ -25,9 +27,10 @@ class Author(models.Model):
 
 class Category(models.Model):
     category_name = models.CharField(max_length=32, unique=True)
+    subscribers = models.ManyToManyField(User, related_name='categories')
 
-    #def __str__(self):
-        #return self.category_name()
+    def __str__(self):
+        return self.category_name()
 
 
 class Post(models.Model):
@@ -85,3 +88,14 @@ class Comment(models.Model):
         self.rating -=1
         self.save()
 
+class Subscription(models.Model):
+    user = models.ForeignKey(
+        to=User,
+        on_delete=models.CASCADE,
+        related_name='subscriptions',
+    )
+    category = models.ForeignKey(
+        to='Category',
+        on_delete=models.CASCADE,
+        related_name='subscriptions',
+    )
