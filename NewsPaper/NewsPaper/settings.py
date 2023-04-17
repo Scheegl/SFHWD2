@@ -169,3 +169,5 @@ MANAGERS = (
     ('Petr', 'petr@yandex.ru'),
 )
 
+APSCHEDULER_DATE_FORMAT = 'N j, Y, f:s a'
+APSCHEDULER_RUN_NOW_TIMEOUT = 25

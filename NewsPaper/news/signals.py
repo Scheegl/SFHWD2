@@ -12,10 +12,10 @@ def product_created(instance, created, **kwargs):
         return
 
     emails = User.objects.filter(
-        subscriptions__category=instance.category
+        subscriptions__category=instance.post_category
     ).values_list('email', flat=True)
 
-    subject = f'Новый пост в подсайте {instance.category}'
+    subject = f'Новый пост в подсайте {instance.post_category}'
 
     text_content = (
         f'Заголовок: {instance.title}\n'

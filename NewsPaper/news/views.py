@@ -5,7 +5,7 @@ from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
 
 from .forms import PostForm
-from .models import Post, Subscription, Category
+from .models import Post, Subscription, Category, PostCategory
 from .filters import PostFilter
 from django.contrib.auth.decorators import login_required
 from django.db.models import Exists, OuterRef

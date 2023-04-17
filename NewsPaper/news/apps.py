@@ -6,4 +6,4 @@ class PostConfig(AppConfig):
     name = 'news'
 
     def ready(self):
-        from . import signals
+        pass

@@ -23,9 +23,9 @@ def my_job():
     categories = set(posts.values_list('category__name', flat=True))
     subscribers = set(Category.objects.filter(name__in=categories).values_list('subscribers_email', flat=True))
     html_content = render_to_string(
-        'daly_post.html',
+        'daily_post.html',
         {
-            'link' : settings.SITE_URL,
+            'link': settings.SITE_URL,
             'posts': posts
         }
     )
