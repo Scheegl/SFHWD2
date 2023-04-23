@@ -7,3 +7,4 @@ class PostConfig(AppConfig):
 
     def ready(self):
         pass
+
