@@ -4,12 +4,18 @@ from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
 
+from django.views.decorators.cache import cache_page
+
 from .forms import PostForm
 from .models import Post, Subscription, Category, PostCategory
 from .filters import PostFilter
 from django.contrib.auth.decorators import login_required
 from django.db.models import Exists, OuterRef
 from django.views.decorators.csrf import csrf_protect
+import logging
+
+logging = logging.getLogger(__name__)
+
 
 class PostList(ListView):
     model = Post
@@ -34,6 +40,14 @@ class PostDetail(DetailView):
     template_name = 'post.html'
     context_object_name = 'post'
 
+    def get_object(self, *args, **kwargs):
+        obj = cache_page.get(f'news-{self.kwargs["pk"]}', None)
+        if not obj:
+            obj = super().get_object(queryset=self.queryset)
+            cache_page.set(f'news-{self.kwargs["pk"]}', obj)
+
+        return obj
+
 
 def create_post(request):
     form = PostForm()
@@ -45,23 +59,27 @@ def create_post(request):
 
     return render(request, 'news_edit.html', {'form': form})
 
+
 class PostCreate(PermissionRequiredMixin, CreateView):
     permission_required = ('news.add_post')
     from_class = PostForm
     model = Post
     template_name = 'news_edit.html'
 
-class PostUpdate(PermissionRequiredMixin,UpdateView):
+
+class PostUpdate(PermissionRequiredMixin, UpdateView):
     permission_required = ('news.change_post')
     form_class = PostForm
     model = Post
     template_name = 'news_edit.html'
 
-class PostDelete(PermissionRequiredMixin,DetailView):
+
+class PostDelete(PermissionRequiredMixin, DetailView):
     permission_required = ('news.delete_post')
     model = Post
     template_name = 'news_delete.html'
     success_url = reverse_lazy('post_list')
+
 
 @login_required
 @csrf_protect

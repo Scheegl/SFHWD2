@@ -6,6 +6,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Sum
 from django.views.generic import CreateView
+from django.core.cache import cache
 
 
 class Author(models.Model):
@@ -21,7 +22,7 @@ class Author(models.Model):
         comment_r = 0
         comment_r += comment_rait.get('comment_rating')
 
-        self.rating_author = author_r *3 + comment_r
+        self.rating_author = author_r * 3 + comment_r
         self.save()
 
 
@@ -49,13 +50,19 @@ class Post(models.Model):
     text = models.TextField()
     rating_post = models.IntegerField(default=0)
 
+    def get_absolute_url(self):
+        return f'/news/{self.id}'
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        cache.delete(f'news-{self.pk}')
 
     def like(self):
-        self.rating_post +=1
+        self.rating_post += 1
         self.save()
 
     def dislike(self):
-        self.rating_post -=1
+        self.rating_post -= 1
         self.save()
 
     def preview(self):
@@ -81,12 +88,13 @@ class Comment(models.Model):
     rating = models.IntegerField(default=0)
 
     def like(self):
-        self.rating +=1
+        self.rating += 1
         self.save()
 
     def dislike(self):
-        self.rating -=1
+        self.rating -= 1
         self.save()
+
 
 class Subscription(models.Model):
     user = models.ForeignKey(

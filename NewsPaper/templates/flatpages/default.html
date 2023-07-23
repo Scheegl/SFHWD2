@@ -1,5 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
+{% load cache %}
+    {% cache 30 header %}
+        {% block header %}
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
@@ -12,6 +15,8 @@
         {% load static %}
         <link href="{% static 'css/styles.css' %}" rel="stylesheet" />
     </head>
+        {% endblock header %}
+    {% endcache %}
     <body>
         <!-- Responsive navbar-->
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark static-top">
