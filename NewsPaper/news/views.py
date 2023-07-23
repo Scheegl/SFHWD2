@@ -15,7 +15,7 @@ from django.views.decorators.csrf import csrf_protect
 import logging
 
 logging = logging.getLogger(__name__)
-
+#
 
 class PostList(ListView):
     model = Post
