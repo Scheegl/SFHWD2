@@ -16,7 +16,6 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
@@ -27,7 +26,6 @@ SECRET_KEY = 'django-insecure-wwmj@u9*s@t3fl8u50$stcwoie-%t5ex3-=+o0e2uz@o%dguco
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
 
 # Application definition
 
@@ -61,6 +59,8 @@ MIDDLEWARE = [
     'django.middleware.cache.UpdateCacheMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.cache.FetchFromCacheMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
 ]
 
 SITE_ID = 1
@@ -91,7 +91,6 @@ AUTHENTICATION_BACKENDS = [
 
 WSGI_APPLICATION = 'NewsPaper.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
@@ -109,7 +108,6 @@ DATABASES = {
     #     'NAME': BASE_DIR / 'db.sqlite3',
     # }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
@@ -129,11 +127,10 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru'
 
 TIME_ZONE = 'UTC'
 
@@ -141,6 +138,9 @@ USE_I18N = True
 
 USE_TZ = True
 
+LOCALE_PATHS = [
+    os.path.join(BASE_DIR, 'locale')
+]
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
@@ -200,12 +200,45 @@ CACHES = {
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
-    'handlers': {
+    'style': '{',
+    'filters': {
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        },
+    },
+    'formatters': {
         'console': {
+            'format': '%(asctime)s - %(levelname)s - %(message)s',
+        },
+        'general': {
+            'format': '%(asctime)s - %(module)s - %(message)s',
+        },
+        'warning': {
+            'format': '%(asctime)s - %(levelname)s - %(message)s - %(pathname)s',
+        },
+        'errors': {
+            'format': '%(asctime)s - %(levelname)s - %(message)s - %(pathname)s\n%(exc_info)s',
+        },
+        'errors_mail': {
+            'format': '%(asctime)s - %(levelname)s - %(message)s - %(pathname)s',
+        },
+        'security': {
+            'format': '%(asctime)s - %(levelname)s - %(module)s - %(message)s',
+        },
+    },
+    'handlers': {
+        'console_d': {
+            'level': 'DEBUG',
             'class': 'logging.StreamHandler',
             'formatter': 'console',
         },
+        'console_w': {
+            'level': 'WARNING',
+            'class': 'logging.StreamHandler',
+            'formatter': 'warning',
+        },
         'general_log': {
+            'level': 'INFO',
             'class': 'logging.FileHandler',
             'filename': 'general.log',
             'formatter': 'general',
@@ -225,34 +258,17 @@ LOGGING = {
             'class': 'django.utils.log.AdminEmailHandler',
             'level': 'ERROR',
             'include_html': False,
-            'formatter': 'errors',
+            'formatter': 'errors_mail',
         },
-    },
-    'formatters': {
-        'console': {
-            'format': '%(asctime)s - %(levelname)s - %(message)s',
-        },
-        'general': {
-            'format': '%(asctime)s - %(levelname)s - %(module)s - %(message)s',
-        },
-        'errors': {
-            'format': '%(asctime)s - %(levelname)s - %(message)s - %(pathname)s\n%(exc_info)s',
-        },
-        'security': {
-            'format': '%(asctime)s - %(levelname)s - %(module)s - %(message)s',
-        },
-    },
-    'root': {
-        'handlers': ['console'],
-        'level': 'DEBUG',
     },
     'loggers': {
         'django': {
-            'handlers': ['console', 'general_log', 'errors_log'],
+            'handlers': ['console_d', 'console_w', 'general_log'],
             'level': 'DEBUG',
+            'propagate': True,
         },
         'django.security': {
-            'handlers': ['console', 'security_log'],
+            'handlers': ['security_log'],
             'level': 'DEBUG',
         },
         'django.request': {
@@ -262,6 +278,16 @@ LOGGING = {
         },
         'django.server': {
             'handlers': ['errors_log', 'mail_admins'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'django.template': {
+            'handlers': ['errors_log'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'django.db.backends': {
+            'handlers': ['errors_log'],
             'level': 'ERROR',
             'propagate': False,
         },
